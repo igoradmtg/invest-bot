@@ -1,129 +1,146 @@
-# Trading bot based on Tinkoff Invest Python gRPC client API
+# Торговый бот на основе Tinkoff Invest Python gRPC client API
 
-## Project Status
-The project status is an example of trading bot and isn't ready for any production using. 
-The provided trade strategy is just an example and have negative profit by the end.
+## Статус проекта
 
+Статус проекта — это пример торгового бота, и он не готов к использованию в производственной среде.  
+Предоставленная стратегия торговли — это всего лишь пример и в итоге приносит отрицательную прибыль.
 
-## Description
-Here is trading bot for MOEX Exchange with ability to send information about trading to a telegram chat.
-The bot is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python) api.
+## Описание
 
-## Features
-- Trading RUB stocks via [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) on MOEX Exchange 
-- Ability to use personal trade strategy for every stock
-- Trade information sends to a telegram chat (orders details, trade day summary etc.)
+Здесь представлен торговый бот для биржи MOEX с возможностью отправки информации о торговле в чат Telegram.  
+Бот использует [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python) API.
 
-Note: trade strategy is represented in code is just example and not a trade or invest recommendation.     
+## Возможности
 
-## Before Start
-### Dependencies
+- Торговля акциями в RUB через [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) на бирже MOEX  
+- Возможность использования персональной торговой стратегии для каждой акции  
+- Информация о торговле отправляется в чат Telegram (детали ордеров, сводка торгового дня и т.д.)  
 
-- [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python)
+Примечание: представленная в коде стратегия торговли — это всего лишь пример и не является рекомендацией для торговли или инвестиций.
+
+## Перед запуском
+
+### Зависимости
+
+- [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python)  
 <!-- termynal -->
 ```
 $ pip install tinkoff-investments
 ```
-- [aiogram](https://docs.aiogram.dev/en/latest/)
+- [aiogram](https://docs.aiogram.dev/en/latest/)  
 <!-- termynal -->
 ```
 $ pip install -U aiogram
 ```
-### Brokerage account
-Open brokerage account [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) and top up your account:
-1. "Margin trading" must be enabled 
 
-Do not forget to take TOKEN for API trading.
+### Брокерский счет
 
-### Telegram (optional)
-Register your bot via @BotFather.
+Откройте брокерский счет в [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) и пополните его:  
+1. Должна быть включена опция "Margin trading".  
+Не забудьте получить TOKEN для API торговли.
 
-Create a chat and get chat_id.
+### Telegram (опционально)
 
-PS. Please use Google to find detailed instruction how to get chat_id.    
+Зарегистрируйте бота через @BotFather.  
+Создайте чат и получите chat_id.  
+P.S. Пожалуйста, используйте Google для поиска подробной инструкции по получению chat_id.
 
-### Required configuration (minimal)
-1. Open `settings.ini` file
-2. Specify token for trade API in `TOKEN` (section `INVEST_API`)
-3. (Optinal) Specify token for a telegram bot in `TELEGRAM_BOT_TOKEN` (section `BLOG`)
-4. (Optinal) Specify id of a telegram chat in `TELEGRAM_CHAT_ID` (section `BLOG`)
+### Необходимая конфигурация (минимальная)
 
-### Run
-Recommendation is to use python 3.10 (bot has been tested on 3.10 version include real trading). 
+1. Откройте файл `settings.ini`.  
+2. Укажите токен для торгового API в `TOKEN` (секция `INVEST_API`).  
+3. (Опционально) Укажите токен для бота Telegram в `TELEGRAM_BOT_TOKEN` (секция `BLOG`).  
+4. (Опционально) Укажите ID чата Telegram в `TELEGRAM_CHAT_ID` (секция `BLOG`).
 
-Run main.py
+### Запуск
 
-## Configuration
-Configuration can be specified via settings.ini file.
-### Section INVEST_API
-Token and app name for [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) api.
-### Section BLOG
-- status - telegram working mode: 
-  - 0 - disabled
-  - 1 - enabled
-- token and chat id for telegram api
-### Section TRADING_ACCOUNT
-Minimal amount of rub on account for start trading.
-### Section TRADING_SETTINGS
-Settings for time management. Bot trades only in main trade session. Bot ignore pre\post market etc. 
-### Section Strategies
-Settings for trade strategies.
+Рекомендуется использовать Python 3.10 (бот тестировался на версии 3.10, включая реальную торговлю).  
+Запустите main.py.
 
-Section STRATEGY_ticker_name:
+## Конфигурация
 
-- `STRATEGY_NAME` - name of algorithm
-- `TICKER` - ticker name (human-friendly name for telegram messages)
-- `FIGI` - figi of stock. Required for API
-- `MAX_LOTS_PER_ORDER` - Maximum count of lots per order
+Конфигурацию можно указать в файле settings.ini.
 
-Section STRATEGY_ticker_name_SETTINGS:
+### Секция INVEST_API
 
-Detailed settings for strategy. Strategy class reads and parses settings manually.  
+Токен и имя приложения для API [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/).
 
-Note: Only one strategy for one stock in configuration.
+### Секция BLOG
 
-## Trading on stocks exchange
-Before start:
-- Token verification
-- Appropriate account selects automatically by token
-- By trading schedule, bot selects time to start trading (start main trading session) 
+- status — режим работы Telegram:  
+  - 0 — отключен  
+  - 1 — включен  
+- token и chat id для API Telegram.
 
-Main session:
-- Bot checks:
-  - stock status for every stock (list of strategies from configuration)
-  - minimum amount of rub on account
-- Starts gRPC stream for data from API
-- Strategies analyse candles and return signals if needed 
-- Bot opens orders by signals from strategies
-- If stop or take price levels are confirmed, bot closes orders
+### Секция TRADING_ACCOUNT
 
-Trading schedule:
-- Bot awaits start and end of main trading session
-- Bot works every trade day 
-- Restart doesn't require for trading. Only in emergency situations. 
+Минимальная сумма в RUB на счете для начала торговли.
 
-## How to add a new strategy
-- Write a new class with trade logic
-- The new class must have IStrategy as super class 
-- Give a name for the new class
-- Extend StrategyFactory class by the name and return the new class by the name
-- Specify new settings in settings.ini file. Put the new class name in `STRATEGY_NAME`
-- Test the new class on historical candles
+### Секция TRADING_SETTINGS
 
-## Telegram messages
-Information about:
-- Trading day summary at start and list of stocks
-- Open and close orders, take profit and stop loss price levels
-- Trading day summary in the end of day
+Настройки для управления временем. Бот торгует только в основной торговой сессии. Бот игнорирует пре- и пост-маркет и т.д.
 
-Telegram messages are optional and can be disabled without any effect on trading.
+### Секция Strategies
 
-## Logging
-All logs are written in logs/robot.log.
-Any kind of settings can be changed in main.py code
+Настройки для торговых стратегий.  
+Секция STRATEGY_ticker_name:  
+- `STRATEGY_NAME` — имя алгоритма  
+- `TICKER` — имя тикера (удобное для чтения имя для сообщений в Telegram)  
+- `FIGI` — FIGI акции. Обязательно для API  
+- `MAX_LOTS_PER_ORDER` — Максимальное количество лотов на ордер  
 
-## Project change log
-[Here](CHANGELOG.md)
+Секция STRATEGY_ticker_name_SETTINGS:  
+Детальные настройки для стратегии. Класс стратегии читает и парсит настройки вручную.  
+Примечание: Только одна стратегия на одну акцию в конфигурации.
 
-## Disclaimer
-The author is not responsible for any errors or omissions, or for the trade results obtained from the use of this bot. 
+## Торговля на фондовой бирже
+
+Перед запуском:  
+- Проверка токена  
+- Подходящий счет выбирается автоматически по токену  
+- По расписанию торговли бот выбирает время для начала торговли (начало основной торговой сессии)  
+
+Основная сессия:  
+- Бот проверяет:  
+  - Статус акции для каждой акции (список стратегий из конфигурации)  
+  - Минимальную сумму в RUB на счете  
+- Запускает gRPC stream для данных из API  
+- Стратегии анализируют свечи и возвращают сигналы при необходимости  
+- Бот открывает ордера по сигналам от стратегий  
+- Если уровни stop или take profit подтверждаются, бот закрывает ордера  
+
+Расписание торговли:  
+- Бот ожидает начала и конца основной торговой сессии  
+- Бот работает каждый торговый день  
+- Перезапуск не требуется для торговли. Только в чрезвычайных ситуациях.
+
+## Как добавить новую стратегию
+
+- Напишите новый класс с логикой торговли  
+- Новый класс должен наследовать от IStrategy  
+- Присвойте имя новому классу  
+- Расширьте класс StrategyFactory именем и возвратом нового класса по имени  
+- Укажите новые настройки в файле settings.ini. Укажите имя нового класса в `STRATEGY_NAME`  
+- Протестируйте новый класс на исторических свечах  
+
+## Сообщения в Telegram
+
+Информация о:  
+- Сводке торгового дня в начале и списке акций  
+- Открытии и закрытии ордеров, уровнях take profit и stop loss  
+- Сводке торгового дня в конце дня  
+
+Сообщения в Telegram опциональны и могут быть отключены без влияния на торговлю.
+
+## Логирование
+
+Все логи записываются в logs/robot.log.  
+Любые настройки можно изменить в коде main.py.
+
+## Журнал изменений проекта
+
+[Здесь](CHANGELOG.md)
+
+## Отказ от ответственности
+
+Автор не несет ответственности за любые ошибки или упущения, а также за результаты торговли, полученные от использования этого бота.
